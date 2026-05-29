@@ -1,3 +1,4 @@
+import torch;
 import matplotlib.pyplot as plt
 
 names = []
@@ -17,15 +18,30 @@ alfabet.sort()
 def stoi(c):
     return alfabet.index(c)
 
-print(alfabet)
+alfabet_len = len(alfabet)
 
-model = [[0] * len(alfabet) for _ in range(len(alfabet))]
+model = torch.zeros(alfabet_len, alfabet_len, dtype=torch.int)
+print(model[0][0])
+
 for name in names:
     for i, c in enumerate(name[:-1]):
         x = stoi(name[i])
         y = stoi(name[i+1])
-        print(f"{x}, {y}")
-        model[x][y] += 1
+        model[x, y] += 1
 
-print(model)
+print(model[5, 5].data)
+
+plt.imshow(model.cpu().numpy().T)
+
+for i in range(alfabet_len):
+    for j in range(alfabet_len):
+        plt.text(i, j, model[i, j].item(), fontsize=6, ha='center', va='center')
+        
+plt.xticks(range(alfabet_len), alfabet)
+plt.yticks(range(alfabet_len), alfabet)
+ax = plt.gca()
+ax.xaxis.tick_top()
+plt.colorbar()
+plt.title("SK mena")
+plt.show()
 
