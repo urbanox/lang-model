@@ -57,20 +57,24 @@ for x_index in range(alfabet_len):
     for y_index in range(alfabet_len):
         model[x_index, y_index] = model[x_index, y_index] / sum
 
-current_index = 0
 for i in range(10):
     name = ""
+    current_index = 0
     while True:
         if not torch.isclose(model[current_index, :].sum(), torch.tensor(1.0)):
             raise "Wrong probability"
         
         next_index = torch.multinomial(model[current_index, :], num_samples=1).item()
-        print(f"probability: {model[current_index, :][next_index]}")
-        # print(f"Index: {next_index}, '{itos(next_index)}'")
+        # next_index = torch.multinomial(torch.ones(alfabet_len), num_samples=1).item()
+        # print(model[current_index, :])
+        # print(f"index: {next_index}, char {itos(next_index)} probability: {model[current_index, next_index]}")
         
         next_char = itos(next_index)
         if next_char == '.':
-            print(name) 
+            if len(name) < 3:
+                continue
+
+            print(f"\033[32m {name} \033[0m") 
             break
 
         name += next_char
