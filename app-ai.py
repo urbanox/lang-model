@@ -1,6 +1,6 @@
 import torch;
 import matplotlib.pyplot as plt
-import torch.nn.functional as F
+import torch.nn.functional as TF
 
 def stoi(c, alfabet):
     return alfabet.index(c)
@@ -42,7 +42,7 @@ def generate_ai():
             x.append(stoi(name[i]))
             y.append(stoi(name[i+1]))
 
-    X = F.one_hot(torch.tensor(x), alfabet_len).float()
+    X = TF.one_hot(torch.tensor(x), alfabet_len).float()
     Y = torch.tensor(y)
 
     g = torch.Generator()
@@ -63,21 +63,20 @@ def generate_ai():
         
     torch.save(W, "model-ap.pt")
     
-def generate_names():
+def generate_names(alfabet):
     W = torch.as_tensor(torch.load("model-ap.pt"))
     alfabet_len = W.shape[0]
-    print(alfabet_len)
-    
-    
     for i in range(10):
         name = ""
         current_index = 0
         while True:
-            X = F.one_hot(torch.tensor(current_index) , alfabet_len).float()
+            X = TF.one_hot(torch.tensor(current_index) , alfabet_len).float()
             F = X@W
+            F = F.exp()
+            F = F/F.sum(dim=0, keepdim=True)
             next_index = torch.multinomial(F, num_samples=1).item()
             
-            next_char = itos(next_index)
+            next_char = itos(next_index, alfabet)
             if next_char == '.':
                 if len(name) < 3:
                     continue
@@ -85,6 +84,8 @@ def generate_names():
                 print(f"\033[32m {name} \033[0m") 
                 break
 
-        name += next_char
-        current_index = next_index
+            name += next_char
+            current_index = next_index
     
+names, alfabet = load_names()
+generate_names(alfabet)
